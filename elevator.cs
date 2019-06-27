@@ -163,30 +163,36 @@ public void Main()
     shaftSensorTriggered = true;
     ExtendElevator();
   }
-
-  IsElevatorIdle();
-  IsElevatorEmpty();
+  
+  try {IsElevatorIdle();} catch (Exception) {elevatorError = "An error occured while checking if the elevator is idle.";}
+  try {IsElevatorEmpty();} catch (Exception) {elevatorError = "An error occured while checking if the elevator is empty.";}
   
   // elevator door logic
-  if (UseElevatorDoors)
+  try
   {
-    if (elevatorPosition == ElevatorMaxDistance)
+    if (UseElevatorDoors)
     {
-      elevatorDoorTop.ApplyAction("Open_On");
-      elevatorDoorBottom.ApplyAction("Open_Off");
-    }
-    else if (elevatorPosition == ElevatorMinDistance)
-    {
-      elevatorDoorTop.ApplyAction("Open_Off");
-      elevatorDoorBottom.ApplyAction("Open_On");
-    }
-    else
-    {
-      elevatorDoorTop.ApplyAction("Open_Off");
-      elevatorDoorBottom.ApplyAction("Open_Off");
+      if (elevatorPosition == ElevatorMaxDistance)
+      {
+        elevatorDoorTop.ApplyAction("Open_On");
+        elevatorDoorBottom.ApplyAction("Open_Off");
+      }
+      else if (elevatorPosition == ElevatorMinDistance)
+      {
+        elevatorDoorTop.ApplyAction("Open_Off");
+        elevatorDoorBottom.ApplyAction("Open_On");
+      }
+      else
+      {
+        elevatorDoorTop.ApplyAction("Open_Off");
+        elevatorDoorBottom.ApplyAction("Open_Off");
+      }
     }
   }
-
+  catch (Exception)
+  {
+    elevatorError = "An error occured in the elevator door logic.";
+  }
   // LCD code
   lcdTop.ContentType=ContentType.TEXT_AND_IMAGE;
   lcdTop.ContentType=ContentType.TEXT_AND_IMAGE;
@@ -216,7 +222,10 @@ public void Main()
   
   // Echo text
   Echo("elevatorPosition: "+elevatorPosition+"\nelevator_status: "+elevator_status+"\n\nelevatorSensorShaft.Enabled: "+elevatorSensorShaft.Enabled.ToString()+"\nelevatorSensorBottom.Enabled: "+elevatorSensorBottom.Enabled.ToString()+"\n\nelevatorSensorShaft.IsActive: "+elevatorSensorShaft.IsActive.ToString()+"\nelevatorSensorBottom.IsActive: "+elevatorSensorBottom.IsActive.ToString()+"\n\nshaftSensorTriggered: "+shaftSensorTriggered+"\nbottomSensorTriggered: "+bottomSensorTriggered.ToString());
-  Echo("elevatorError: "+elevatorError);
+  if (elevatorError != null)
+  {
+    Echo("elevatorError: "+elevatorError);
+  }
 
   // Debug text
   if (Debug)
