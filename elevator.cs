@@ -44,34 +44,34 @@ optional, but prevent other players from falling into the elevator shaft.
 */ 
 
 // [Configuration]
-string lcd_top_name = "SGM1 - Corner LCD Flat Top - Elevator Top";
+const string LcdTopName = "SGM1 - Corner LCD Flat Top - Elevator Top";
 
-string lcd_bottom_name = "SGM1 - Corner LCD Flat Top - Elevator Bottom";
+const string LcdBottomName = "SGM1 - Corner LCD Flat Top - Elevator Bottom";
 
-string piston_elevator_name = "SGM1 - Piston Elevator Maintenance";
+const string PistonElevatorName = "SGM1 - Piston Elevator Maintenance";
 
-string elevator_sensor_shaft_name = "SGM1 - Sensor - Elevator - Top";
-string elevator_sensor_bottom_name = "SGM1 - Sensor - Elevator - Bottom";
+const string ElevatorSensorShaftName = "SGM1 - Sensor - Elevator - Top";
+const string ElevatorSensorBottomName = "SGM1 - Sensor - Elevator - Bottom";
 
-string elevator_door_top_name = "SGM1 - Door (Maintenance Top)";
-string elevator_door_bottom_name = "SGM1 - Door (Maintenance Bottom)";
+const string ElevatorDoorTopName = "SGM1 - Door (Maintenance Top)";
+const string ElevatorDoorBottomName = "SGM1 - Door (Maintenance Bottom)";
 
-ushort elevator_max_distance = 10;
-ushort elevator_min_distance = 0;
+const byte ElevatorMaxDistance = 10;
+const byte ElevatorMinDistance = 0;
 
-bool use_elevator_doors = true;
+const bool UseElevatorDoors = true;
 
 // If debug is set to true, another LCD display will be avaliable to play with the variables of this script. 
-bool debug = false;
-string lcd_debug_name = "lcddebug";
+const bool Debug = false;
+const string LcdDebugName = "lcddebug";
 
 /* END OF CONFIG */
 
 
 string elevator_status;
 
-bool shaft_sensor_triggered;
-bool bottom_sensor_triggered;
+bool shaftSensorTriggered;
+bool bottomSensorTriggered;
 public Program()
 {
   Runtime.UpdateFrequency = UpdateFrequency.Update10;
@@ -80,39 +80,39 @@ public Program()
 public void Main()
 {
   // internal variables
-  var lcd_top = (IMyTextPanel) GridTerminalSystem.GetBlockWithName(lcd_top_name);
-  var lcd_bottom = (IMyTextPanel) GridTerminalSystem.GetBlockWithName(lcd_bottom_name);
+  var lcdTop = (IMyTextPanel) GridTerminalSystem.GetBlockWithName(LcdTopName);
+  var lcdBottom = (IMyTextPanel) GridTerminalSystem.GetBlockWithName(LcdBottomName);
 
-  var piston_elevator = (IMyPistonBase) GridTerminalSystem.GetBlockWithName(piston_elevator_name);
+  var pistonElevator = (IMyPistonBase) GridTerminalSystem.GetBlockWithName(PistonElevatorName);
 
-  var elevator_sensor_shaft = (IMySensorBlock) GridTerminalSystem.GetBlockWithName(elevator_sensor_shaft_name);
-  var elevator_sensor_bottom = (IMySensorBlock) GridTerminalSystem.GetBlockWithName(elevator_sensor_bottom_name);
+  var elevatorSensorShaft = (IMySensorBlock) GridTerminalSystem.GetBlockWithName(ElevatorSensorShaftName);
+  var elevatorSensorBottom = (IMySensorBlock) GridTerminalSystem.GetBlockWithName(ElevatorSensorBottomName);
 
-  var elevator_door_top = (IMyDoor) GridTerminalSystem.GetBlockWithName(elevator_door_top_name);
-  var elevator_door_bottom = (IMyDoor) GridTerminalSystem.GetBlockWithName(elevator_door_bottom_name);
+  var elevatorDoorTop = (IMyDoor) GridTerminalSystem.GetBlockWithName(ElevatorDoorTopName);
+  var elevatorDoorBottom = (IMyDoor) GridTerminalSystem.GetBlockWithName(ElevatorDoorBottomName);
 
-  var elevator_position_float = float.Parse(piston_elevator.DetailedInfo.Split(' ','\n')[3].TrimEnd('m'));
+  var elevatorPosition = float.Parse(pistonElevator.DetailedInfo.Split(' ','\n')[3].TrimEnd('m'));
 
   // elevator helper functions
   string ExtendElevator() 
   {
-    piston_elevator.ApplyAction("Extend");
+    pistonElevator.ApplyAction("Extend");
     return elevator_status = "Raising";
   }
   
   string RetractElevator()
   {
-    piston_elevator.ApplyAction("Retract");
+    pistonElevator.ApplyAction("Retract");
     return elevator_status = "Lowering";
   }
 
   bool IsElevatorEmpty()
   {
-    if (!elevator_sensor_bottom.IsActive && !elevator_sensor_shaft.IsActive && (elevator_position_float == elevator_max_distance || elevator_position_float == elevator_min_distance))
+    if (!elevatorSensorBottom.IsActive && !elevatorSensorShaft.IsActive && (elevatorPosition == ElevatorMaxDistance || elevatorPosition == ElevatorMinDistance))
     {
-      shaft_sensor_triggered = false;
-      bottom_sensor_triggered = false;
-      if (elevator_position_float == 0)
+      shaftSensorTriggered = false;
+      bottomSensorTriggered = false;
+      if (elevatorPosition == 0)
       {
         ExtendElevator();
       }
@@ -123,7 +123,7 @@ public void Main()
 
   bool IsElevatorIdle() 
   {
-    if (elevator_position_float == elevator_max_distance || elevator_position_float == elevator_min_distance)
+    if (elevatorPosition == ElevatorMaxDistance || elevatorPosition == ElevatorMinDistance)
     {
       elevator_status = "Idle";
       return true;
@@ -132,21 +132,21 @@ public void Main()
   }
 
   // elevator logic
-  if (elevator_sensor_shaft.IsActive && !bottom_sensor_triggered)
+  if (elevatorSensorShaft.IsActive && !bottomSensorTriggered)
   {
-    shaft_sensor_triggered = true;
+    shaftSensorTriggered = true;
     RetractElevator();
   }
 
-  if (elevator_sensor_bottom.IsActive && !elevator_sensor_shaft.IsActive)
+  if (elevatorSensorBottom.IsActive && !elevatorSensorShaft.IsActive)
   {
-    bottom_sensor_triggered = true;
+    bottomSensorTriggered = true;
     RetractElevator();
   }
   
-  if (bottom_sensor_triggered && elevator_sensor_shaft.IsActive)
+  if (bottomSensorTriggered && elevatorSensorShaft.IsActive)
   {
-    shaft_sensor_triggered = true;
+    shaftSensorTriggered = true;
     ExtendElevator();
   }
 
@@ -154,33 +154,33 @@ public void Main()
   IsElevatorEmpty();
   
   // elevator door logic
-  if (use_elevator_doors)
+  if (UseElevatorDoors)
   {
-    if (elevator_position_float == elevator_max_distance)
+    if (elevatorPosition == ElevatorMaxDistance)
     {
-      elevator_door_top.ApplyAction("Open_On");
-      elevator_door_bottom.ApplyAction("Open_Off");
+      elevatorDoorTop.ApplyAction("Open_On");
+      elevatorDoorBottom.ApplyAction("Open_Off");
     }
-    else if (elevator_position_float == elevator_min_distance)
+    else if (elevatorPosition == ElevatorMinDistance)
     {
-      elevator_door_top.ApplyAction("Open_Off");
-      elevator_door_bottom.ApplyAction("Open_On");
+      elevatorDoorTop.ApplyAction("Open_Off");
+      elevatorDoorBottom.ApplyAction("Open_On");
     }
     else
     {
-      elevator_door_top.ApplyAction("Open_Off");
-      elevator_door_bottom.ApplyAction("Open_Off");
+      elevatorDoorTop.ApplyAction("Open_Off");
+      elevatorDoorBottom.ApplyAction("Open_Off");
     }
   }
 
   // LCD code
-  lcd_top.ContentType=ContentType.TEXT_AND_IMAGE;
-  lcd_top.ContentType=ContentType.TEXT_AND_IMAGE;
-  lcd_top.FontSize = 2;
+  lcdTop.ContentType=ContentType.TEXT_AND_IMAGE;
+  lcdTop.ContentType=ContentType.TEXT_AND_IMAGE;
+  lcdTop.FontSize = 2;
 
-  lcd_bottom.ContentType=ContentType.TEXT_AND_IMAGE;
-  lcd_bottom.ContentType=ContentType.TEXT_AND_IMAGE;
-  lcd_bottom.FontSize = 2;
+  lcdBottom.ContentType=ContentType.TEXT_AND_IMAGE;
+  lcdBottom.ContentType=ContentType.TEXT_AND_IMAGE;
+  lcdBottom.FontSize = 2;
 
   IMyTextSurface programmable_block_lcd=Me.GetSurface(0);
   
@@ -191,22 +191,22 @@ public void Main()
   // string piston_animation_vertical ;
 
   string flavor_text = @"\bin\warez\piston\piston_elevator.cs"+"\npiston_elevator: Running... Piston Elevator\n";
-  string stats = "\n\nElevator Status: "+elevator_status+"\nPiston Position: "+elevator_position_float+"m"+"\nTop Elevator Sensor: "+elevator_sensor_shaft.IsActive.ToString()+"\nBottom Elevator Sensor: "+elevator_sensor_bottom.IsActive.ToString();
+  string stats = "\n\nElevator Status: "+elevator_status+"\nPiston Position: "+elevatorPosition+"m"+"\nTop Elevator Sensor: "+elevatorSensorShaft.IsActive.ToString()+"\nBottom Elevator Sensor: "+elevatorSensorBottom.IsActive.ToString();
   
   programmable_block_lcd.WriteText(flavor_text+stats);
   
-  lcd_top.SetValue( "alignment", (Int64)2 );
-  lcd_bottom.SetValue( "alignment", (Int64)2 );
-  lcd_top.WriteText(elevator_status.ToString());
-  lcd_bottom.WriteText(elevator_status.ToString());
+  lcdTop.SetValue( "alignment", (Int64)2 );
+  lcdBottom.SetValue( "alignment", (Int64)2 );
+  lcdTop.WriteText(elevator_status.ToString());
+  lcdBottom.WriteText(elevator_status.ToString());
   
   // Echo text
-  Echo("elevator_position_float: "+elevator_position_float+"\nelevator_status: "+elevator_status+"\n\nelevator_sensor_shaft.Enabled: "+elevator_sensor_shaft.Enabled.ToString()+"\nelevator_sensor_bottom.Enabled: "+elevator_sensor_bottom.Enabled.ToString()+"\n\nelevator_sensor_shaft.IsActive: "+elevator_sensor_shaft.IsActive.ToString()+"\nelevator_sensor_bottom.IsActive: "+elevator_sensor_bottom.IsActive.ToString()+"\n\nshaft_sensor_triggered: "+shaft_sensor_triggered+"\nbottom_sensor_triggered: "+bottom_sensor_triggered.ToString());
+  Echo("elevatorPosition: "+elevatorPosition+"\nelevator_status: "+elevator_status+"\n\nelevatorSensorShaft.Enabled: "+elevatorSensorShaft.Enabled.ToString()+"\nelevatorSensorBottom.Enabled: "+elevatorSensorBottom.Enabled.ToString()+"\n\nelevatorSensorShaft.IsActive: "+elevatorSensorShaft.IsActive.ToString()+"\nelevatorSensorBottom.IsActive: "+elevatorSensorBottom.IsActive.ToString()+"\n\nshaftSensorTriggered: "+shaftSensorTriggered+"\nbottomSensorTriggered: "+bottomSensorTriggered.ToString());
 
   // Debug text
-  if (debug)
+  if (Debug)
   {
-    var lcd_debug = (IMyTextPanel) GridTerminalSystem.GetBlockWithName(lcd_debug_name);
-    lcd_debug.WriteText("elevator_status: "+elevator_status+"\n\nelevator_sensor_shaft.Enabled: "+elevator_sensor_shaft.Enabled.ToString()+"\nelevator_sensor_bottom.Enabled: "+elevator_sensor_bottom.Enabled.ToString()+"\n\nelevator_sensor_shaft.IsActive: "+elevator_sensor_shaft.IsActive.ToString()+"\nelevator_sensor_bottom.IsActive: "+elevator_sensor_bottom.IsActive.ToString()+"\n\nshaft_sensor_triggered: "+shaft_sensor_triggered+"\nbottom_sensor_triggered: "+bottom_sensor_triggered.ToString());
+    var LcdDebug = (IMyTextPanel) GridTerminalSystem.GetBlockWithName(LcdDebugName);
+    LcdDebug.WriteText("elevator_status: "+elevator_status+"\n\nelevatorSensorShaft.Enabled: "+elevatorSensorShaft.Enabled.ToString()+"\nelevatorSensorBottom.Enabled: "+elevatorSensorBottom.Enabled.ToString()+"\n\nelevatorSensorShaft.IsActive: "+elevatorSensorShaft.IsActive.ToString()+"\nelevatorSensorBottom.IsActive: "+elevatorSensorBottom.IsActive.ToString()+"\n\nshaftSensorTriggered: "+shaftSensorTriggered+"\nbottomSensorTriggered: "+bottomSensorTriggered.ToString());
   }
 }
