@@ -27,12 +27,12 @@ SS - sensor shaft
 SB - sensor bottom
 ED - elevator door (optional)
 
-ED __
-      | |
-      | |
-      | | 
-      | |  ED
-      PP ZZ
-      SS SB
+      ED __
+         ||
+         ||
+         || 
+         || ED
+         PP ZZ
+         SS SB
 
 The shaft sensor (SS) will need to detect every block in the shaft of the elevator reaching just above the piston top (__). The bottom sensor (SB) will only need to reach slightly above the armor block to detect the person wanting to call the elevator down. The elevator doors are optional, but prevent other players from falling into the elevator shaft.
