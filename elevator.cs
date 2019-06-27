@@ -69,7 +69,7 @@ const string LcdDebugName = "lcddebug";
 
 
 string elevator_status;
-
+string elevatorError;
 bool shaftSensorTriggered;
 bool bottomSensorTriggered;
 public Program()
@@ -95,15 +95,29 @@ public void Main()
 
   // elevator helper functions
   string ExtendElevator() 
-  {
+  {   
+    try
+    {
     pistonElevator.ApplyAction("Extend");
     return elevator_status = "Raising";
+    }
+    catch (Exception)
+    {
+      return elevatorError = "An error occured when extending the elevator.";
+    }
   }
-  
+
   string RetractElevator()
   {
+    try
+    {
     pistonElevator.ApplyAction("Retract");
     return elevator_status = "Lowering";
+    }
+    catch (Exception)
+    {
+      return elevatorError = "An error occured when retracting the elevator.";
+    }
   }
 
   bool IsElevatorEmpty()
@@ -202,6 +216,7 @@ public void Main()
   
   // Echo text
   Echo("elevatorPosition: "+elevatorPosition+"\nelevator_status: "+elevator_status+"\n\nelevatorSensorShaft.Enabled: "+elevatorSensorShaft.Enabled.ToString()+"\nelevatorSensorBottom.Enabled: "+elevatorSensorBottom.Enabled.ToString()+"\n\nelevatorSensorShaft.IsActive: "+elevatorSensorShaft.IsActive.ToString()+"\nelevatorSensorBottom.IsActive: "+elevatorSensorBottom.IsActive.ToString()+"\n\nshaftSensorTriggered: "+shaftSensorTriggered+"\nbottomSensorTriggered: "+bottomSensorTriggered.ToString());
+  Echo("elevatorError: "+elevatorError);
 
   // Debug text
   if (Debug)
